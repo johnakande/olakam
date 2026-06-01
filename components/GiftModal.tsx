@@ -7,9 +7,9 @@ interface Props {
 }
 
 export default function GiftModal({ onClose }: Props) {
-  const [copied, setCopied] = useState<'naira' | 'dollar' | null>(null)
+  const [copied, setCopied] = useState<'naira' | 'dollar' | 'lloyds' | null>(null)
 
-  function copy(text: string, which: 'naira' | 'dollar') {
+  function copy(text: string, which: 'naira' | 'dollar' | 'lloyds') {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(which)
       setTimeout(() => setCopied(null), 2000)
@@ -73,7 +73,7 @@ export default function GiftModal({ onClose }: Props) {
         </div>
 
         {/* Dollar account */}
-        <div className="bg-white border border-[#e8e0d2] rounded-xl p-4">
+        <div className="bg-white border border-[#e8e0d2] rounded-xl p-4 mb-3">
           <div className="flex items-center justify-between mb-2">
             <span className="font-jost text-[10px] tracking-[0.12em] uppercase text-[#7a8c5e] font-medium">
               $ Dollar · GTB
@@ -100,6 +100,37 @@ export default function GiftModal({ onClose }: Props) {
           <p className="font-jost text-xs text-[#7a8c5e] mt-0.5">Olaitan Ajao</p>
           <p className="font-mono text-xs text-[#9b7355] mt-2 leading-relaxed">
             Swift: GTBINGLA · Sort: 058-199028
+          </p>
+        </div>
+
+        {/* Lloyds Bank */}
+        <div className="bg-white border border-[#e8e0d2] rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-jost text-[10px] tracking-[0.12em] uppercase text-[#7a8c5e] font-medium">
+              £ GBP · Lloyds Bank
+            </span>
+            <button
+              onClick={() => copy('20737962', 'lloyds')}
+              className="font-jost text-[10px] text-[#5e7048] hover:text-[#2c3a1e] transition-colors flex items-center gap-1"
+            >
+              {copied === 'lloyds' ? (
+                <span className="text-[#5e7048]">Copied ✓</span>
+              ) : (
+                <>
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </>
+              )}
+            </button>
+          </div>
+          <p className="font-mono text-2xl font-bold text-[#4a5e34] tracking-widest">20737962</p>
+          <p className="font-jost text-sm text-[#2c3a1e] mt-1 font-medium">Lloyds Bank</p>
+          <p className="font-jost text-xs text-[#7a8c5e] mt-0.5">Kam Wiwuga</p>
+          <p className="font-mono text-xs text-[#9b7355] mt-2 leading-relaxed">
+            Sort code: 30-92-33
           </p>
         </div>
       </div>
