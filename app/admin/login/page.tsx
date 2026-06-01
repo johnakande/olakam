@@ -23,8 +23,9 @@ export default function AdminLogin() {
       setError('Invalid credentials.')
       setLoading(false)
     } else {
-      router.push('/admin')
-      router.refresh()
+      // Full reload ensures the session cookie is sent with the next request
+      // before the proxy checks it — client-side router.push can race ahead
+      window.location.replace('/admin')
     }
   }
 
