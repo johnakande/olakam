@@ -145,7 +145,7 @@ export default function WeddingPage() {
 
         {/* Event name */}
         <p className="font-jost text-[10px] tracking-[0.16em] uppercase text-[#5a6a4a] mb-5">
-          Thanksgiving &amp; Wedding Ceremony
+          Wedding Ceremony
         </p>
 
         {/* Time */}
@@ -235,18 +235,12 @@ export default function WeddingPage() {
           Reservation
         </button>
 
-        {/* Check access card button */}
+        {/* Check access card link */}
         <a
           href="/check"
-          className="flex items-center justify-center gap-2 w-full mt-3 border border-[#87a06e] rounded-lg py-3 font-jost text-sm font-medium text-[#5e7048] hover:bg-[#eef2e8] active:bg-[#eef2e8] transition-colors duration-200"
+          className="block text-center mt-3 font-jost text-xs text-[#7a8c5e] hover:text-[#4a5e34] transition-colors"
         >
-          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="16" rx="2"/>
-            <path d="M8 10h8M8 14h5"/>
-            <circle cx="17" cy="14" r="2.5"/>
-            <path d="M19 16l2 2"/>
-          </svg>
-          Already submitted? Check your access card
+          Already submitted? Check your access card →
         </a>
 
       </div>
