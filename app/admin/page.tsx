@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     router.push('/admin/login')
   }
 
-  async function review(id: string, action: 'approve' | 'reject') {
+  async function review(id: string, action: 'approve' | 'reject', guest?: Guest) {
     // Optimistic update
     setGuests((prev) =>
       prev.map((g) =>
@@ -56,11 +56,25 @@ export default function AdminDashboard() {
           : g
       )
     )
-    await fetch('/api/admin/review', {
+
+    const res = await fetch('/api/admin/review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, action }),
     })
+
+    // On successful approval open a pre-filled WhatsApp message to the guest
+    if (action === 'approve' && res.ok && guest) {
+      const phone = guest.phone.replace(/\D/g, '') // strip +, spaces, dashes
+      const message = encodeURIComponent(
+        `Hi ${guest.full_name}! 🎉\n\n` +
+        `Your reservation for Olaitan & Kam's Wedding has been approved.\n\n` +
+        `Your Access Card: *${guest.code}*\n\n` +
+        `Please show this at the venue on Saturday, 8th August 2026.\n\n` +
+        `With love — Kam & Olaitan 🌸`
+      )
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+    }
   }
 
   const all = guests
@@ -155,7 +169,7 @@ export default function AdminDashboard() {
   )
 }
 
-function GuestRow({ guest, onReview }: { guest: Guest; onReview: (id: string, action: 'approve' | 'reject') => void }) {
+function GuestRow({ guest, onReview }: { guest: Guest; onReview: (id: string, action: 'approve' | 'reject', guest?: Guest) => void }) {
   const date = new Date(guest.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 
   return (
@@ -176,7 +190,7 @@ function GuestRow({ guest, onReview }: { guest: Guest; onReview: (id: string, ac
         {guest.status === 'pending' && (
           <div className="flex gap-1.5 flex-shrink-0">
             <button
-              onClick={() => onReview(guest.id, 'approve')}
+              onClick={() => onReview(guest.id, 'approve', guest)}
               className="font-jost text-[11px] bg-[#eef2e8] text-[#4a5e34] border border-[#b5c99a] rounded-lg px-2.5 py-1.5 hover:bg-[#dde8d0] transition-colors"
             >
               Approve
