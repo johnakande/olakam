@@ -25,19 +25,44 @@ export async function proxy(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const isUsher = user?.user_metadata?.role === 'usher'
 
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginPath = request.nextUrl.pathname === '/admin/login'
+  const path = request.nextUrl.pathname
+  const isAdminPath = path.startsWith('/admin')
+  const isAdminLogin = path === '/admin/login'
+  const isUsherPath = path.startsWith('/usher')
+  const isUsherLogin = path === '/usher/login'
 
-  if (isAdminPath && !isLoginPath && !user) {
+  // Admin dashboard: requires login, and usher accounts are not admins.
+  if (isAdminPath && !isAdminLogin) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/login'
+      return NextResponse.redirect(url)
+    }
+    if (isUsher) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/usher'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  if (isAdminLogin && user && !isUsher) {
     const url = request.nextUrl.clone()
-    url.pathname = '/admin/login'
+    url.pathname = '/admin'
     return NextResponse.redirect(url)
   }
 
-  if (isLoginPath && user) {
+  // Door check-in: any authenticated account (admin or usher) can use it.
+  if (isUsherPath && !isUsherLogin && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/admin'
+    url.pathname = '/usher/login'
+    return NextResponse.redirect(url)
+  }
+
+  if (isUsherLogin && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/usher'
     return NextResponse.redirect(url)
   }
 
@@ -45,5 +70,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/usher/:path*'],
 }

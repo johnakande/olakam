@@ -7,6 +7,7 @@ type Result =
   | { status: 'approved'; code: string; full_name: string }
   | { status: 'pending'; full_name: string }
   | { status: 'rejected'; full_name: string }
+  | { status: 'revoked'; full_name: string }
   | { status: 'not_found' }
   | null
 
@@ -163,6 +164,27 @@ export default function CheckPage() {
             <p className="font-cormorant text-xl font-semibold text-[#2c3a1e] mb-2">{result.full_name}</p>
             <p className="font-cormorant italic text-[#9b7355] text-base mb-4">
               Sorry, we couldn&apos;t accommodate your request.
+            </p>
+            <button
+              onClick={() => { setResult(null); setPhone('') }}
+              className="font-jost text-xs text-[#9b9b8a] hover:text-[#5a6a4a] transition-colors"
+            >
+              Check another number
+            </button>
+          </div>
+        )}
+
+        {result && result.status === 'revoked' && (
+          <div className="text-center">
+            <div className="w-14 h-14 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="8" y1="8" x2="16" y2="16" />
+              </svg>
+            </div>
+            <p className="font-cormorant text-xl font-semibold text-[#2c3a1e] mb-2">{result.full_name}</p>
+            <p className="font-cormorant italic text-[#9b7355] text-base mb-4">
+              Your access has been revoked. Please contact the couple directly.
             </p>
             <button
               onClick={() => { setResult(null); setPhone('') }}

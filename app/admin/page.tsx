@@ -77,6 +77,30 @@ export default function AdminDashboard() {
     }
   }
 
+  async function toggleRevoke(id: string, revoked: boolean) {
+    if (revoked && !window.confirm('Revoke this guest\'s access? They will be blocked at the door and their access card will stop working.')) {
+      return
+    }
+
+    // Optimistic update
+    setGuests((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, revoked } : g))
+    )
+
+    const res = await fetch('/api/admin/revoke', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, revoked }),
+    })
+
+    if (!res.ok) {
+      // Revert on failure
+      setGuests((prev) => prev.map((g) => (g.id === id ? { ...g, revoked: !revoked } : g)))
+    } else {
+      fetchGuests()
+    }
+  }
+
   const all = guests
   const stats = {
     total: all.length,
@@ -159,7 +183,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="space-y-2">
             {guests.map((guest) => (
-              <GuestRow key={guest.id} guest={guest} onReview={review} />
+              <GuestRow key={guest.id} guest={guest} onReview={review} onToggleRevoke={toggleRevoke} />
             ))}
           </div>
         )}
@@ -169,11 +193,22 @@ export default function AdminDashboard() {
   )
 }
 
-function GuestRow({ guest, onReview }: { guest: Guest; onReview: (id: string, action: 'approve' | 'reject', guest?: Guest) => void }) {
+function GuestRow({
+  guest,
+  onReview,
+  onToggleRevoke,
+}: {
+  guest: Guest
+  onReview: (id: string, action: 'approve' | 'reject', guest?: Guest) => void
+  onToggleRevoke: (id: string, revoked: boolean) => void
+}) {
   const date = new Date(guest.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  const checkedInTime = guest.checked_in_at
+    ? new Date(guest.checked_in_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    : null
 
   return (
-    <div className="bg-white border border-[#e8e0d2] rounded-xl p-4">
+    <div className={`bg-white border rounded-xl p-4 ${guest.revoked ? 'border-red-200' : 'border-[#e8e0d2]'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="font-jost text-sm font-medium text-[#2c3a1e] truncate">{guest.full_name}</p>
@@ -183,26 +218,48 @@ function GuestRow({ guest, onReview }: { guest: Guest; onReview: (id: string, ac
             <span className={`font-jost text-[10px] px-2 py-0.5 rounded-full border ${STATUS_COLORS[guest.status]}`}>
               {STATUS_LABEL[guest.status]}
             </span>
+            {guest.revoked && (
+              <span className="font-jost text-[10px] px-2 py-0.5 rounded-full border bg-red-50 text-red-700 border-red-200">
+                🚫 Revoked
+              </span>
+            )}
+            {guest.checked_in_at && (
+              <span className="font-jost text-[10px] px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                ✅ Checked in {checkedInTime}
+              </span>
+            )}
             <span className="font-jost text-[10px] text-[#9b9b8a]">{date}</span>
           </div>
         </div>
 
-        {guest.status === 'pending' && (
-          <div className="flex gap-1.5 flex-shrink-0">
-            <button
-              onClick={() => onReview(guest.id, 'approve', guest)}
-              className="font-jost text-[11px] bg-[#eef2e8] text-[#4a5e34] border border-[#b5c99a] rounded-lg px-2.5 py-1.5 hover:bg-[#dde8d0] transition-colors"
-            >
-              Approve
-            </button>
-            <button
-              onClick={() => onReview(guest.id, 'reject')}
-              className="font-jost text-[11px] bg-[#f5f0ec] text-[#7a5c35] border border-[#d4c4b5] rounded-lg px-2.5 py-1.5 hover:bg-[#ede4dc] transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        )}
+        <div className="flex flex-col gap-1.5 flex-shrink-0 items-end">
+          {guest.status === 'pending' && (
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => onReview(guest.id, 'approve', guest)}
+                className="font-jost text-[11px] bg-[#eef2e8] text-[#4a5e34] border border-[#b5c99a] rounded-lg px-2.5 py-1.5 hover:bg-[#dde8d0] transition-colors"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => onReview(guest.id, 'reject')}
+                className="font-jost text-[11px] bg-[#f5f0ec] text-[#7a5c35] border border-[#d4c4b5] rounded-lg px-2.5 py-1.5 hover:bg-[#ede4dc] transition-colors"
+              >
+                Reject
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => onToggleRevoke(guest.id, !guest.revoked)}
+            className={`font-jost text-[11px] rounded-lg px-2.5 py-1.5 border transition-colors ${
+              guest.revoked
+                ? 'bg-[#eef2e8] text-[#4a5e34] border-[#b5c99a] hover:bg-[#dde8d0]'
+                : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+            }`}
+          >
+            {guest.revoked ? 'Un-revoke' : 'Revoke'}
+          </button>
+        </div>
       </div>
     </div>
   )

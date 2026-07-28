@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     const { data: guest, error } = await supabase
       .from('guests')
-      .select('full_name, status, code')
+      .select('full_name, status, code, revoked')
       .eq('phone', phone.trim())
       .maybeSingle()
 
@@ -21,6 +21,10 @@ export async function POST(request: Request) {
 
     if (!guest) {
       return NextResponse.json({ status: 'not_found' })
+    }
+
+    if (guest.revoked) {
+      return NextResponse.json({ status: 'revoked', full_name: guest.full_name })
     }
 
     if (guest.status === 'approved') {
