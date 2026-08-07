@@ -36,3 +36,6 @@ next-env.d.ts
 
 # playwright mcp session artifacts
 /.playwright-mcp/
+
+# local-only notes with credentials, never commit
+USHERS.md
