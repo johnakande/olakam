@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import type { Guest, GuestStatus } from '@/types'
 
@@ -118,12 +119,20 @@ export default function AdminDashboard() {
           <h1 className="font-cormorant text-xl font-semibold text-[#2c3a1e]">Guest List</h1>
           <p className="font-cormorant italic text-xs text-[#9b7355]">Olaitan &amp; Kam · 8.8.2026</p>
         </div>
-        <button
-          onClick={signOut}
-          className="font-jost text-xs text-[#9b9b8a] hover:text-[#5a6a4a] transition-colors"
-        >
-          Sign out
-        </button>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/export"
+            className="font-jost text-xs text-[#7a8c5e] hover:text-[#4a5e34] transition-colors"
+          >
+            Export
+          </Link>
+          <button
+            onClick={signOut}
+            className="font-jost text-xs text-[#9b9b8a] hover:text-[#5a6a4a] transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pt-5">
